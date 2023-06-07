@@ -1,23 +1,7 @@
-<style>
-    .center {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-</style>
-
-<style>
-.container {
-  max-width: 600px;
-  margin: 0 auto;
-}
-</style>
-<div class="container">
-
-<!-- -->
 # Plataforma Inercial - Galinha
 
 ***este Markdown está meio zuado, veja o pdf**
+
 **\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_**
 
 _**Resumo:** Este relatório apresenta a implementação de uma plataforma inercial, também conhecida como "A Galinha", controlada pela LaunchPad MPS430F5529 que por meio do giroscópio/acelerômetro MPU6050 mensura a perturbação do meio e realiza uma compensação por meio do controle de servos MG90. Foram implementadas as rotinas para compensação por meio de integração do giroscópio e por meio dos dados de aceleração_
@@ -34,12 +18,8 @@ Diversos sistemas dinâmicos em carros, drones, aviões, entre outros dependem d
 Ao final realizaremos uma análise sobre ambos os casos com os pontos negativos e positivos de cada forma de obter estes dados. Ademais, para poder realizar a plataforma, além do MPU6050, precisamos de uma plataforma _Pan Tilt_ e de servos motores comuns que tem acionamento por meio de pulsos modulados em largura, neste projeto utilizamos o servo motor MG90 e a LaunchPad com o MSP430F5529. **O servo SG90 não apresentou desempenho estável, por isto foi substituído pelo MG90.**
 
 <div style="display: flex;">
-  <div style="flex: 50%; padding: 5px;">
     <img src=".fig/CProjFinal-180046004_html_74a61144e968cf8c.jpg" width=400 alt="Image 1">
-  </div>
-  <div style="flex: 50%; padding: 5px;">
     <img src="./.fig/CProjFinal-180046004_html_7f5e1b60d149dcf5.png" width=400 alt="Image 2">
-  </div>
 </div>
 
 _Figure 1: Visão superior lateral da plataforma implementada. No canto superior esquerdo da figura à esquerda, temos o servo MG90 que foi utilizado nos ensaios, o servo do canto inferior esquerdo é o sg90 que não apresentou um desempenho satisfatório nos ensaios. Podemos ver o MPU6050 ao centro, na protoboard e a LaunchPad, que é a placa em vermelho._
@@ -126,8 +106,8 @@ A calibração é um procedimento muito necessário para o bom funcionamento do 
 
 De forma resumida este procedimento. Primeiro deve-se uma explicação do recurso de temporização do timer: um timer foi configurado para operar no _modo-up_ com a interrupção habilitada, programado para interromper sempre a cada 1 milissegundo. Portanto a cada milissegundo temos uma rotina de interrupção sendo executada. Vejamos o fluxograma da interrupção e da rotina.
 
-<div class="center">
-  <img src=".fig/CProjFinal-180046004_html_1d1c34ceb100d1f.jpg" alt="Image" width="400" height="300">
+<div style="text-align: center;">
+  <img src=".fig/CProjFinal-180046004_html_1d1c34ceb100d1f.jpg" alt="Image" width="400" height="300"/>
 </div>
 
 
@@ -149,8 +129,8 @@ Assim é concluído a explicação sobre a forma de obtenção do deslocamento a
 ### **Medição valores do acelerômetro.**
 
 O método do acelerômetro é mais simples.É necessário apenas realizar a leitura e a conversão. A dinâmica de leitura permanece a mesma, redundante seria explicar novamente.
-<div class="center">
-  <img src=".fig/CProjFinal-180046004_html_d7f49e5e9251caec.jpg" alt="Image" width="300" height="400">
+<div style="text-align: center;">
+  <img src=".fig/CProjFinal-180046004_html_d7f49e5e9251caec.jpg" alt="Image" width="300" height="400"/>
 </div>
 
 _Figure 3 Este é o fluxograma simplificado da leitura e processamento para determinação do deslocamento angular pelo acelerômetro._
@@ -166,15 +146,15 @@ Assim temos o valor em ângulos do deslocamento das perturbações. Não está c
 ###  **Dinâmica da plataforma**
 
 Vamos explicar aqui como que a plataforma funciona. Para melhor e mais flexível utilização dos recursos do MPU6050, neste projeto é proposto o seguinte esquema:
-<div class="center">
-<img src="./.fig/CProjFinal-180046004_html_72f0762c8775ec8d.jpg" alt="Image" width="300" height="200">
+<div style="text-align: center;">
+<img src="./.fig/CProjFinal-180046004_html_72f0762c8775ec8d.jpg" alt="Image" width="300" height="200"/>
 </div>
 
 _Figure 4 Configuração da plataforma é feita casando o índice do vetor de dados com valor do contador._
 
 Os valores obtidos a partir do processamento descrito nas seções anteriores estão dispostos num **vetor de dados** indexados de cima para baixo como está disposto na figura acima. Paralelamente, as chaves da LaunchPad, quando acionadas, incrementam um contador que corresponderá à indexação da chave. Assim podemos selecionar, por meio das chaves, qual configuração possível atribuída para cada servo.
-<div class="center">
-<img src="./.fig/CProjFinal-180046004_html_fa13a869ebfe0be.jpg" alt="Image" width="300" height="200">
+<div style="text-align: center;">
+<img src="./.fig/CProjFinal-180046004_html_fa13a869ebfe0be.jpg" alt="Image" width="300" height="200"/>
 </div>
 
 _Figure 5 Na LauchPad, a chave S1 seleciona o servo da base e a chave S2 seleciona o servo do topo._
@@ -184,8 +164,8 @@ _Figure 5 Na LauchPad, a chave S1 seleciona o servo da base e a chave S2 selecio
 Vimos nas seções anteriores como obter o deslocamento angular. Agora será mostrado como controlamos os servos para corresponderem aos deslocamentos amostrados.
 
 Os servos utilizados têm a característica limitante de excursionar 180 graus. Podemos relacionar isto da forma como convier. Aqui estabelecemos uma convenção: o valor mínimo é -90 graus e o máximo +90 graus. Inicialmente o servo fica configurado para 0 graus.
-<div class="center">
-<img src="./.fig/CProjFinal-180046004_html_820e4590a4984600.png" alt="Image" width="300" height="200">
+<div style="text-align: center;">
+<img src="./.fig/CProjFinal-180046004_html_820e4590a4984600.png" alt="Image" width="300" height="200"/>
 </div>
 _Figure 6 posicionamento do servo depende da modulação PWM. Esta figura mostra os valores convencionados para este trabalho e o valor teórico fornecido pelo fabricante do servo do duty cycle que deveriam operar_
 
@@ -198,8 +178,8 @@ Nesta presente seção, serão apresentadas algumas verificações para o projet
 - Verificar a taxa de amostragem.
 
 Primeiramente, será mensurado a taxa de atualização do MPU6050 que foi programado para uma amostragem a cada 7 ms. Isso pode ser verificado por meio do sinal do pino INT do MPU6050 que indica um novo dado sempre quando sai do nível baixo para alto.
-<div class="center">
-<img src=".fig/CProjFinal-180046004_html_d44a53f503b39c81.png" alt="Image" width="600" height="300">
+<div style="text-align: center;">
+<img src=".fig/CProjFinal-180046004_html_d44a53f503b39c81.png" alt="Image" width="600" height="300"/>
 </div>
 
 _Figure 7 Osciloscópio está medindo o pino INT do MPU6050. Os marcadores (texto em branco) mostra que é feita uma medição a cada 7 ms, como foi configurado no registrador SMPRLT\_DIV=6, pois adiciona-se um, logo uma amostragem a cada 6 ms+1 ms._
@@ -207,20 +187,16 @@ _Figure 7 Osciloscópio está medindo o pino INT do MPU6050. Os marcadores (text
 - Verificar o funcionamento do servo do topo com servo da base parado
 
 Agora iremos verificar o correto funcionamento do servo. A forma mais simples que para verificar seria deixar o valor constante da curva do servo correspondendo ao alinhamento deste servo com a altura Eq(2). No servo do topo, não é necessariamente simétrica a relação, a excursão é limitada mecanicamente e a forma de obter as curvas é diferente e depende menos da inclinação que, ainda bem, é mais regular para todos os servos. Isso foi feito de forma empírica:
-<div class="center">
-    <img src=".fig/CProjFinal-180046004_html_1d1c34ceb100d1f.jpg" alt="Image" width="300" height="200">
+<div style="text-align: center;">
+    <img src=".fig/CProjFinal-180046004_html_1d1c34ceb100d1f.jpg" alt="Image" width="300" height="200"/>
 </div>
 
 
 _Figure 8 **Ensaio com o eixo Y para o servo do topo,** vemos que o do topo está ortogonal com relação à mesa. Esta é a condição inicial deste ensaio._
 
 <div style="display: flex;">
-  <div style="flex: 50%; padding: 5px;">
     <img src=".fig/CProjFinal-180046004_html_1de535507fe5ef37.jpg" width=400 alt="Image 1">
-  </div>
-  <div style="flex: 50%; padding: 5px;">
     <img src="./.fig/CProjFinal-180046004_html_c23ce13264976b47.jpg" width=400 alt="Image 2">
-  </div>
 </div>
 
 
@@ -233,20 +209,16 @@ _Figure 9 **Ensaio com o eixo Y para o servo do topo** ; figura à esquerda conv
 Para ser mais fácil visualizar este comportamento, o mais fácil de visualizar seria com o eixo Z. Todavia, este eixo não é eficiente quando utilizamos o acelerômetro, portanto, iremos utilizar o método de integração de velocidade angular obtido pelo giroscópio.
 
 
-<div class="center">
-<img src=".fig/CProjFinal-180046004_html_8e3bf584031428c3.jpg" alt="Image" width="300" height="200">
+<div style="text-align: center;">
+<img src=".fig/CProjFinal-180046004_html_8e3bf584031428c3.jpg" alt="Image" width="300" height="200"/>
 </div>
 
 _Figure **10 Ensaio com o eixo Z para o servo da base** ; esta é a posição inicial, a direção apontada que deve ser compensada está ortogonal ao topo (peça preta onde seria a cabeça da galinha) da plataforma._
 
 
 <div style="display: flex;">
-  <div style="flex: 50%; padding: 5px;">
     <img src=".fig/CProjFinal-180046004_html_ce679e1d34a252bb.jpg" width=400 alt="Image 1">
-  </div>
-  <div style="flex: 50%; padding: 5px;">
     <img src=".fig/CProjFinal-180046004_html_bae9878c60ef7c5c.jpg" width=400 alt="Image 2">
-  </div>
 </div>
 
 _Figure 11 **Ensaio com o eixo Z para o servo da base;** veja que a figura à esquerda, com relação à figura base, sofreu uma rotação no sentido horário, logo o servo corresponde isso realizando uma rotação no sentido anti-horário. O inverso acontece com a figura à direita: a base sofre uma rotação no sentido anti-horário e o servo corresponde com uma rotação no sentido horário._
